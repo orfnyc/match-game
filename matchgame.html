@@ -7,7 +7,6 @@
                 display: inline-block;
                 margin: 4px;
                 height: 200;
-                min-width: 130px;
                 border: none;
                 border-radius: 10px;
                 transform-style: preserve-3d;
@@ -38,19 +37,23 @@
             }
         </style>
         <script>
-            let body, h, score, images, flipped, inProgress;
+            let body, h, score, images, flipped, inProgress, matches, resetMenu, finalScore, message, gameMenu;
             function initialize()
             {
                 score = 0;
                 grid = document.getElementById("grid");
                 h = document.getElementById("score");
+                message = document.getElementById("message");
+                resetMenu = document.getElementById("resetMenu");
+                finalScore = document.getElementById("finalScore");
+                gameMenu = document.getElementById("gameMenu");
                 images = ["url(images/apple1.jpeg)","url(images/leaf1.jpeg)","url(images/pumpkin1.jpeg)",
                     "url(images/pumpkinPie1.jpeg)","url(images/pumpkinSpice1.jpeg)", "url(images/apple2.jpeg)",
                     "url(images/leaf2.jpeg)", "url(images/pumpkin2.jpeg)","url(images/pumpkinPie2.jpeg)",
                     "url(images/pumpkinSpice3.jpeg)","url(images/apple3.jpeg)","url(images/leaf3.jpeg)",
                     "url(images/pumpkin3.jpeg)","url(images/pumpkinPie3.jpeg)","url(images/pumpkinSpice4.jpeg)",
                     "url(images/apple4.jpeg)","url(images/pumpkin4.jpeg)","url(images/pumpkinPie4.jpeg)"];
-                inProgress = 0;
+                inProgress = false;
                 startGame(4, 4);
             }
 
@@ -71,7 +74,7 @@
                         tile.setAttribute("class", "tile");
                         tile.setAttribute("onclick", "flip(this)");
                         tile.setAttribute("state", "back");
-                        tile.setAttribute("style", "height: 150px; width: " +  80/(m+1) + "%");
+                        tile.setAttribute("style", "height: 150px; width: " +  90/(m+1) + "%");
                         let tileBack = document.createElement("div");
                         tileBack.setAttribute("class", "tileBack");
                         let tileFront = document.createElement("div");
@@ -85,6 +88,8 @@
                     }
                     grid.appendChild(row);
                 }
+                matches = n*m / 2;
+                score = 0;
             }
 
             function pickOne(map)
@@ -109,7 +114,7 @@
 
             function flip(obj)
             {
-                if (obj.getAttribute("state") != "removed")
+                if (obj.getAttribute("state") != "removed" && !inProgress)
                 {
                     if (obj.getAttribute("state") === "back")
                     {
@@ -121,6 +126,7 @@
                         }
                         else
                         {
+                            inProgress = true;
                             setTimeout(function () { 
                                 if (flipped.getAttribute("id") === obj.getAttribute("id"))
                                 {
@@ -128,6 +134,8 @@
                                     obj.style.opacity = "0%";
                                     flipped.setAttribute("state", "removed");
                                     obj.setAttribute("state", "removed");
+                                    matches -= 1;
+                                    if (matches <= 0) { win(); }
                                 }
                                 else
                                 {
@@ -137,6 +145,7 @@
                                     obj.setAttribute("state", "back");
                                 }
                                 flipped = null;
+                                inProgress = false;
                              }, 1000);
                         }
                     }
@@ -147,18 +156,42 @@
                         flipped = null;
                     }
                     score++;
-                    h.innerHTML = score;
+                    h.innerHTML = "Score: " + score;
                 }
             }
 
-            function evaluate(obj)
+            function win()
             {
-                
+                gameMenu.setAttribute("hidden", "true");
+                finalScore.innerHTML = score;
+                resetMenu.removeAttribute("hidden");
+            }
+            function reset(n, m)
+            {
+                grid.replaceChildren();
+                gameMenu.removeAttribute("hidden");
+                startGame(n, m);
+                resetMenu.setAttribute("hidden", "true");
             }
         </script>
     </head>
     <body onload="initialize();">
-        <h1 id="score">0</h1>
-        <div id="grid" style="text-align: center;"></div>
+        <div id="gameMenu">
+            <h1 id="score">Score: 0</h1>
+            <div >
+                <button onclick="reset(4, 4);">New Easy</button>
+                <button onclick="reset(5, 4);">New Medium</button>
+                <button onclick="reset(5, 6);">New Hard</button>
+            </div>
+            <div id="grid" style="text-align: center;"></div>
+        </div>
+        <div id="resetMenu" hidden>
+            <h1>New Game?</h1>
+            <h1 id="finalScore"></h1>
+            <h2 id="message"></h2>
+            <button onclick="reset(4, 4);">Easy</button>
+            <button onclick="reset(5, 4);">Medium</button>
+            <button onclick="reset(5, 6);">Hard</button>
+        </div>
     </body>
 </html>
