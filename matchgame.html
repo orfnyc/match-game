@@ -7,8 +7,28 @@
                 display: inline-block;
                 margin: 4px;
                 height: 200;
+                min-width: 130px;
                 border: none;
                 border-radius: 10px;
+                transform-style: preserve-3d;
+                transition: all 0.5s ease;  
+            }
+            .tileBack
+            {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                backface-visibility: hidden;
+                background-image: url("images/tileBack.jpeg");
+                
+            }
+            .tileFront
+            {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                backface-visibility: hidden;
+                transform: rotateY(180deg);
             }
             .row
             {
@@ -18,7 +38,7 @@
             }
         </style>
         <script>
-            let tiles, body, h, score, images, flipped, inProgress;
+            let body, h, score, images, flipped, inProgress;
             function initialize()
             {
                 score = 0;
@@ -37,8 +57,6 @@
             function startGame(n, m)
             {
                 let options = new Map()
-                
-                tiles = new Map();
                 for (let i = 0; i < n*m/2; i++)
                 {
                     options.set(images[i], 2);
@@ -49,12 +67,18 @@
                     row.setAttribute("class", "row");
                     for (let j = 0; j < m; j++)
                     {
-                        let tile = document.createElement("div")
-                        tiles.set(tile, pickOne(options));
+                        let tile = document.createElement("div");
                         tile.setAttribute("class", "tile");
                         tile.setAttribute("onclick", "flip(this)");
+                        tile.setAttribute("state", "back");
                         tile.setAttribute("style", "height: 150px; width: " +  80/(m+1) + "%");
-                        tile.style.backgroundImage = "url(images/tileBack.jpeg";
+                        let tileBack = document.createElement("div");
+                        tileBack.setAttribute("class", "tileBack");
+                        let tileFront = document.createElement("div");
+                        tileFront.setAttribute("class", "tileFront");
+                        tileFront.style.backgroundImage = pickOne(options);
+                        tile.appendChild(tileBack);
+                        tile.appendChild(tileFront);
                         row.appendChild(tile);
                     }
                     grid.appendChild(row);
@@ -83,47 +107,29 @@
 
             function flip(obj)
             {
-                if (tiles.has(obj) && inProgress < 2)
+                
+                if (obj.getAttribute("state") === "back")
                 {
-                    inProgress++;
-                    obj.style.background = tiles.get(obj);
-                    if (flipped == null) 
-                    {
-                        flipped = obj;
-                    }
-                    else
-                    {
-                        setTimeout(function() {
-                            evaluate(obj);
-                        }, 2000);
-                    }
-                    score++;
-                    h.innerHTML = score;
+                    obj.style.transform = "rotateY(180deg)";
+                    obj.setAttribute("state", "front");
                 }
+                else
+                {
+                    obj.style.transform = "rotateY(0deg)";
+                    obj.setAttribute("state", "back");
+                }
+                score++;
+                h.innerHTML = score;
             }
 
             function evaluate(obj)
             {
-
-                if (tiles.get(flipped) === tiles.get(obj))
-                {
-                    obj.style.opacity = "0%";
-                    flipped.style.opacity = "0%";
-                    tiles.delete(flipped);
-                    tiles.delete(obj);
-                }
-                else
-                {
-                    obj.style.backgroundImage = "url(images/tileBack.jpeg)";
-                    flipped.style.backgroundImage = "url(images/tileBack.jpeg)";
-                }
-                flipped = null;
-                inProgress = 0;
+                
             }
         </script>
     </head>
     <body onload="initialize();">
         <h1 id="score">0</h1>
-        <div id="grid"></div>
+        <div id="grid" style="text-align: center;"></div>
     </body>
 </html>
