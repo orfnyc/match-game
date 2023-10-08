@@ -76,7 +76,9 @@
                         tileBack.setAttribute("class", "tileBack");
                         let tileFront = document.createElement("div");
                         tileFront.setAttribute("class", "tileFront");
-                        tileFront.style.backgroundImage = pickOne(options);
+                        let str = pickOne(options)
+                        tileFront.style.backgroundImage = str;
+                        tile.setAttribute("id", str);
                         tile.appendChild(tileBack);
                         tile.appendChild(tileFront);
                         row.appendChild(tile);
@@ -107,19 +109,46 @@
 
             function flip(obj)
             {
-                
-                if (obj.getAttribute("state") === "back")
+                if (obj.getAttribute("state") != "removed")
                 {
-                    obj.style.transform = "rotateY(180deg)";
-                    obj.setAttribute("state", "front");
+                    if (obj.getAttribute("state") === "back")
+                    {
+                        obj.style.transform = "rotateY(180deg)";
+                        obj.setAttribute("state", "front");
+                        if (flipped == null)
+                        {
+                            flipped = obj;
+                        }
+                        else
+                        {
+                            setTimeout(function () { 
+                                if (flipped.getAttribute("id") === obj.getAttribute("id"))
+                                {
+                                    flipped.style.opacity = "0%";
+                                    obj.style.opacity = "0%";
+                                    flipped.setAttribute("state", "removed");
+                                    obj.setAttribute("state", "removed");
+                                }
+                                else
+                                {
+                                    flipped.style.transform = "rotateY(0deg)";
+                                    obj.style.transform = "rotateY(0deg)";
+                                    flipped.setAttribute("state", "back");
+                                    obj.setAttribute("state", "back");
+                                }
+                                flipped = null;
+                             }, 1000);
+                        }
+                    }
+                    else
+                    {
+                        obj.style.transform = "rotateY(0deg)";
+                        obj.setAttribute("state", "back");
+                        flipped = null;
+                    }
+                    score++;
+                    h.innerHTML = score;
                 }
-                else
-                {
-                    obj.style.transform = "rotateY(0deg)";
-                    obj.setAttribute("state", "back");
-                }
-                score++;
-                h.innerHTML = score;
             }
 
             function evaluate(obj)
