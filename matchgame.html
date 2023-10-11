@@ -218,7 +218,8 @@
                         obj.setAttribute("state", "back");
                         flipped = null;
                     }
-                    score++;
+                    const incScore = () => { score ++; }
+                    incScore();
                     h.innerHTML = `Score: ${score}`;
                 }
             }
